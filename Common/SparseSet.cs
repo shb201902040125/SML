@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace SML.Common
 {
-    public class SparseSet<Tkey, TValue> : IEnumerable<TValue> where TValue : unmanaged
+    public class SparseSet<TKey, TValue> : IEnumerable<TValue> where TValue : unmanaged
     {
         TValue[] _datas;
-        Dictionary<Tkey, int> _map;
-        Dictionary<int,Tkey> _keys;
+        Dictionary<TKey, int> _map;
+        Dictionary<int,TKey> _keys;
         int _ptr = 0;
         public SparseSet(int capacity)
         {
@@ -20,7 +20,7 @@ namespace SML.Common
             _map = [];
             _keys = [];
         }
-        public bool Add(Tkey key, TValue value)
+        public bool Add(TKey key, TValue value)
         {
             if (_ptr >= _datas.Length)
             {
@@ -32,7 +32,7 @@ namespace SML.Common
             _ptr++;
             return true;
         }
-        public bool Remove(Tkey key)
+        public bool Remove(TKey key)
         {
             if (!_map.Remove(key, out var offset))
             {
@@ -48,7 +48,7 @@ namespace SML.Common
             _ptr--;
             return true;
         }
-        public bool Contains(Tkey key) 
+        public bool Contains(TKey key) 
         {
             return _map.ContainsKey(key);
         }
@@ -69,7 +69,7 @@ namespace SML.Common
         {
             return GetEnumerator();
         }
-        public ref TValue this[Tkey key] => ref _datas[_map[key]];
+        public ref TValue this[TKey key] => ref _datas[_map[key]];
         public Span<TValue> AsSpan()
         {
             return new Span<TValue>(_datas, 0, _ptr);
