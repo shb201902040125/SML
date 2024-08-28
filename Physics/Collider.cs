@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SML.Physics
 {
@@ -12,7 +8,7 @@ namespace SML.Physics
         public object BindTarget;
         public Vector2[] Vectors;
         public Matrix Transform;
-        public Vector2[] GetTransformedVectors()
+        public readonly Vector2[] GetTransformedVectors()
         {
             Vector2[] transformedVectors = new Vector2[Vectors.Length];
             for (int i = 0; i < Vectors.Length; i++)
@@ -21,7 +17,7 @@ namespace SML.Physics
             }
             return transformedVectors;
         }
-        public SMRectangle GetEnvelope()
+        public readonly SMRectangle GetEnvelope()
         {
             Vector2[] transformedVectors = GetTransformedVectors();
             float minX = float.MaxValue;
@@ -29,12 +25,27 @@ namespace SML.Physics
             float minY = float.MaxValue;
             float maxY = float.MinValue;
 
-            foreach (var vector in transformedVectors)
+            foreach (Vector2 vector in transformedVectors)
             {
-                if (vector.X < minX) minX = vector.X;
-                if (vector.X > maxX) maxX = vector.X;
-                if (vector.Y < minY) minY = vector.Y;
-                if (vector.Y > maxY) maxY = vector.Y;
+                if (vector.X < minX)
+                {
+                    minX = vector.X;
+                }
+
+                if (vector.X > maxX)
+                {
+                    maxX = vector.X;
+                }
+
+                if (vector.Y < minY)
+                {
+                    minY = vector.Y;
+                }
+
+                if (vector.Y > maxY)
+                {
+                    maxY = vector.Y;
+                }
             }
             return new SMRectangle(minX, minY, maxX - minX, maxY - minY);
         }
@@ -42,16 +53,53 @@ namespace SML.Physics
         {
             return HashCode.Combine(BindTarget, Vectors, Transform);
         }
-        #region SAT
-        public bool CheckCollisionSAT(Collider other)
+        #region SpecialCheck
+        public readonly bool CheckCollisionSpecial(Collider other)
         {
+            return Vectors is null || other.Vectors is null
+                ? Vectors == other.Vectors
+                : Vectors.Length == 1 && other.Vectors.Length == 1
+                ? Vectors[0] == other.Vectors[0]
+                : Vectors.Length == 1 && other.Vectors.Length == 2
+                ? IsPointOnLine(Vectors[0], other.Vectors[0], other.Vectors[1])
+                : Vectors.Length == 2 && other.Vectors.Length == 1
+                ? IsPointOnLine(other.Vectors[0], Vectors[0], Vectors[1])
+                : IsLinesCross(Vectors[0], Vectors[1], other.Vectors[0], other.Vectors[1]);
+        }
+        private static bool IsLinesCross(Vector2 line1Start, Vector2 line1End, Vector2 line2Start, Vector2 line2End)
+        {
+            float denominator = ((line1End.X - line1Start.X) * (line2End.Y - line2Start.Y)) - ((line1End.Y - line1Start.Y) * (line2End.X - line2Start.X));
+            if (denominator == 0)
+            {
+                return !(line1Start == line2Start || line1Start == line2End);
+            }
+            float numerator1 = ((line1Start.Y - line2Start.Y) * (line2End.X - line2Start.X)) - ((line1Start.X - line2Start.X) * (line2End.Y - line2Start.Y));
+            float numerator2 = ((line1Start.Y - line2Start.Y) * (line1End.X - line1Start.X)) - ((line1Start.X - line2Start.X) * (line1End.Y - line1Start.Y));
+            float r = numerator1 / denominator;
+            float s = numerator2 / denominator;
+            return r >= 0 && r <= 1 && s >= 0 && s <= 1;
+        }
+        private static bool IsPointOnLine(Vector2 point, Vector2 lineStart, Vector2 LineEnd)
+        {
+            return point == lineStart || point == LineEnd
+|| (lineStart != LineEnd
+&& (point.X - lineStart.X) / (LineEnd.X - lineStart.X) == (point.Y - lineStart.Y) / (LineEnd.Y - lineStart.Y) && (point - lineStart).Length() < (LineEnd - lineStart).Length());
+        }
+        #endregion
+        #region SAT
+        public readonly bool CheckCollisionSAT(Collider other)
+        {
+            if ((Vectors?.Length ?? 0) < 3 || (other.Vectors?.Length ?? 0) < 3)
+            {
+                return CheckCollisionSpecial(other);
+            }
             Vector2[] transformedVectors = GetTransformedVectors();
             Vector2[] otherTransformedVectors = other.GetTransformedVectors();
 
             Vector2[] axes = GetAxes(transformedVectors);
             Vector2[] otherAxes = GetAxes(otherTransformedVectors);
 
-            foreach (var axis in axes)
+            foreach (Vector2 axis in axes)
             {
                 if (!IsOverlapping(axis, transformedVectors, otherTransformedVectors))
                 {
@@ -59,7 +107,7 @@ namespace SML.Physics
                 }
             }
 
-            foreach (var axis in otherAxes)
+            foreach (Vector2 axis in otherAxes)
             {
                 if (!IsOverlapping(axis, transformedVectors, otherTransformedVectors))
                 {
@@ -85,9 +133,8 @@ namespace SML.Physics
         }
         private static bool IsOverlapping(Vector2 axis, Vector2[] transformedVectors1, Vector2[] transformedVectors2)
         {
-            float min1, max1, min2, max2;
-            Project(axis, transformedVectors1, out min1, out max1);
-            Project(axis, transformedVectors2, out min2, out max2);
+            Project(axis, transformedVectors1, out float min1, out float max1);
+            Project(axis, transformedVectors2, out float min2, out float max2);
 
             return !(min1 > max2 || min2 > max1);
         }
@@ -111,12 +158,16 @@ namespace SML.Physics
         }
         #endregion
         #region GJK
-        public bool CheckCollisionGJK(Collider other)
+        public readonly bool CheckCollisionGJK(Collider other)
         {
+            if ((Vectors?.Length ?? 0) < 3 || (other.Vectors?.Length ?? 0) < 3)
+            {
+                return CheckCollisionSpecial(other);
+            }
             Vector2[] transformedVectors = GetTransformedVectors();
             Vector2[] otherTransformedVectors = other.GetTransformedVectors();
 
-            Vector2 direction = new Vector2(1, 0);
+            Vector2 direction = new(1, 0);
             Vector2[] simplex = new Vector2[3];
             int simplexSize = 0;
 
@@ -150,7 +201,7 @@ namespace SML.Physics
             float maxDot = float.MinValue;
             Vector2 farthestPoint = vectors[0];
 
-            foreach (var vector in vectors)
+            foreach (Vector2 vector in vectors)
             {
                 float dot = Vector2.Dot(vector, direction);
                 if (dot > maxDot)
@@ -210,7 +261,7 @@ namespace SML.Physics
         {
             float ac = Vector2.Dot(a, c);
             float bc = Vector2.Dot(b, c);
-            return b * ac - a * bc;
+            return (b * ac) - (a * bc);
         }
         #endregion
     }

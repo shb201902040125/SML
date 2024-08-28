@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.ModLoader;
 
 namespace SML.Common
 {
     public unsafe class CacheBlock<T> : IDisposable where T : struct
     {
-        T[] _data;
-        IntPtr _ptr;
-        GCHandle _handle;
-        SegmentTreeAllocator _allocator;
-        HashSet<Interface> undisposedInterfaces = new();
+        private T[] _data;
+        private GCHandle _handle;
+        private SegmentTreeAllocator _allocator;
+        private HashSet<Interface> undisposedInterfaces = [];
         internal object _lock = new();
         public CacheBlock(int capacity)
         {
             _data = new T[capacity];
             _handle = GCHandle.Alloc(_data, GCHandleType.Pinned);
-            _ptr = _handle.AddrOfPinnedObject();
             _allocator = new SegmentTreeAllocator(capacity);
         }
         ~CacheBlock()
@@ -38,7 +32,7 @@ namespace SML.Common
             {
                 if (_data != null)
                 {
-                    List<Interface> list = new List<Interface>(undisposedInterfaces);
+                    List<Interface> list = new(undisposedInterfaces);
                     foreach (Interface @interface in list)
                     {
                         @interface.Dispose();
@@ -69,9 +63,9 @@ namespace SML.Common
         }
         public class Interface : IDisposable
         {
-            CacheBlock<T> _cache;
-            int _pos;
-            int _size;
+            private CacheBlock<T> _cache;
+            private int _pos;
+            private int _size;
             internal Interface(CacheBlock<T> cache, int pos, int size)
             {
                 _cache = cache;

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SML.Common
 {
     public class NormalCache : IDisposable
     {
-        Dictionary<string, object> _cache = [];
+        private Dictionary<string, object> _cache = [];
         public event Action<IEnumerable<KeyValuePair<string, object>>> OnDispose;
         ~NormalCache()
         {
@@ -33,15 +30,11 @@ namespace SML.Common
         }
         public T Get<T>(string key)
         {
-            if (_cache.TryGetValue(key, out var value))
-            {
-                return (T)value;
-            }
-            return default;
+            return _cache.TryGetValue(key, out object value) ? (T)value : default;
         }
         public bool TryGet<T>(string key, out T obj)
         {
-            if (_cache.TryGetValue(key, out var value) && value is T t)
+            if (_cache.TryGetValue(key, out object value) && value is T t)
             {
                 obj = t;
                 return true;

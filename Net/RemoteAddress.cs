@@ -1,11 +1,5 @@
 ﻿using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.Net;
 
 namespace SML.Net
 {
@@ -29,17 +23,13 @@ namespace SML.Net
         public override string ToString()
         {
             string text = (SteamId.m_SteamID % 2uL).ToString();
-            string text2 = ((SteamId.m_SteamID - (76561197960265728L + SteamId.m_SteamID % 2uL)) / 2uL).ToString();
+            string text2 = ((SteamId.m_SteamID - (76561197960265728L + (SteamId.m_SteamID % 2uL))) / 2uL).ToString();
             return "STEAM_0:" + text + ":" + text2;
         }
         public override string GetIdentifier() => ToString();
         public override bool IsLocalHost()
         {
-            if (!SteamAPI.Init())
-            {
-                return false;
-            }
-            return SteamUser.GetSteamID().Equals(SteamId);
+            return SteamAPI.Init() && SteamUser.GetSteamID().Equals(SteamId);
         }
         public override string GetFriendlyName()
         {

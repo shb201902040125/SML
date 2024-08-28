@@ -1,10 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using SML.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 
 namespace SML.Physics
@@ -102,14 +97,13 @@ namespace SML.Physics
             int y = hashCode / Main.tile.Width;
             int x = hashCode % Main.tile.Width;
             Vector2 leftTop = new Vector2(x, y) * 16;
-            switch(tile.Slope)
+            switch (tile.Slope)
             {
                 default:
                 case Terraria.ID.SlopeType.Solid:
                     {
-                        if(tile.IsHalfBlock)
-                        {
-                            return new()
+                        return tile.IsHalfBlock
+                            ? new()
                             {
                                 BindTarget = tile,
                                 Vectors =
@@ -120,22 +114,21 @@ namespace SML.Physics
                                     leftTop + new Vector2(0, 16)
                                 ],
                                 Transform = Matrix.Identity
-                            };
-                        }
-                        return new()
-                        {
-                            BindTarget = tile,
-                            Vectors =
+                            }
+                            : new()
+                            {
+                                BindTarget = tile,
+                                Vectors =
                             [
                                 leftTop,
                                 leftTop + new Vector2(16, 0),
                                 leftTop + new Vector2(16, 16),
                                 leftTop + new Vector2(0, 16)
                             ],
-                            Transform = Matrix.Identity
-                        };
+                                Transform = Matrix.Identity
+                            };
                     }
-                    //左下，没有右上
+                //左下，没有右上
                 case Terraria.ID.SlopeType.SlopeDownLeft:
                     {
                         return new()
@@ -150,7 +143,7 @@ namespace SML.Physics
                             Transform = Matrix.Identity
                         };
                     }
-                    //右下，没有左上
+                //右下，没有左上
                 case Terraria.ID.SlopeType.SlopeDownRight:
                     {
                         return new()
@@ -165,7 +158,7 @@ namespace SML.Physics
                             Transform = Matrix.Identity
                         };
                     }
-                    //左上，没有右下
+                //左上，没有右下
                 case Terraria.ID.SlopeType.SlopeUpLeft:
                     {
                         return new()
@@ -180,7 +173,7 @@ namespace SML.Physics
                             Transform = Matrix.Identity
                         };
                     }
-                    //右上，没有左下
+                //右上，没有左下
                 case Terraria.ID.SlopeType.SlopeUpRight:
                     {
                         return new()
@@ -200,14 +193,14 @@ namespace SML.Physics
         public static CacheBlock<Collider> ScanTileColliders(int x, int y, int width, int height)
         {
             CacheBlock<Collider> cacheBlock = new(width * height);
-            cacheBlock.Rent(width * height, out var @interface);
+            cacheBlock.Rent(width * height, out CacheBlock<Collider>.Interface @interface);
             using (@interface)
             {
                 for (int j = 0; j < height; j++)
                 {
                     for (int i = 0; i < width; i++)
                     {
-                        @interface[i + j * width] = Main.tile[x + i, y + j].GetCollider();
+                        @interface[i + (j * width)] = Main.tile[x + i, y + j].GetCollider();
                     }
                 }
             }

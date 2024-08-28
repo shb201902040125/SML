@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SML.Common
 {
     public class SparseSet<TKey, TValue> : IEnumerable<TValue> where TValue : struct
     {
-        TValue[] _datas;
-        Dictionary<TKey, int> _map;
-        Dictionary<int,TKey> _keys;
-        int _ptr = 0;
+        private TValue[] _datas;
+        private Dictionary<TKey, int> _map;
+        private Dictionary<int, TKey> _keys;
+        private int _ptr = 0;
         public SparseSet(int capacity)
         {
             _datas = new TValue[capacity];
@@ -34,7 +30,7 @@ namespace SML.Common
         }
         public bool Remove(TKey key)
         {
-            if (!_map.Remove(key, out var offset))
+            if (!_map.Remove(key, out int offset))
             {
                 return false;
             }
@@ -48,7 +44,7 @@ namespace SML.Common
             _ptr--;
             return true;
         }
-        public bool Contains(TKey key) 
+        public bool Contains(TKey key)
         {
             return _map.ContainsKey(key);
         }

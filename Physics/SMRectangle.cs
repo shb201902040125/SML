@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SML.Physics
 {
@@ -16,7 +12,11 @@ namespace SML.Physics
         public readonly Vector2 RightTop => LeftTop + new Vector2(Width, 0);
         public readonly Vector2 LeftBottom => LeftTop + new Vector2(0, Height);
         public readonly Vector2 RightBottom => LeftTop + new Vector2(Width, Height);
-        public readonly Vector2 Center => LeftTop + new Vector2(Width, Height) / 2;
+        public readonly Vector2 MiddleLeft => LeftTop + new Vector2(0, Height / 2);
+        public readonly Vector2 MiddleRight => LeftTop + new Vector2(Width, Height / 2);
+        public readonly Vector2 MiddleTop => LeftTop + new Vector2(Width / 2, 0);
+        public readonly Vector2 MiddleBottom => LeftTop + new Vector2(Width / 2, Height);
+        public readonly Vector2 Center => LeftTop + (new Vector2(Width, Height) / 2);
         public readonly float Left => LeftTop.X;
         public readonly float Right => LeftTop.X + Width;
         public readonly float Top => LeftTop.Y;
@@ -43,18 +43,18 @@ namespace SML.Physics
         {
             return new()
             {
-                LeftTop = center + (center - LeftTop) * scale,
+                LeftTop = center + ((center - LeftTop) * scale),
                 Width = Width * scale,
                 Height = Height * scale
             };
         }
         public readonly bool Intersects(SMRectangle value)
         {
-            if (value.Left < Right && Left < value.Right && value.Top < Bottom)
-            {
-                return Top < value.Bottom;
-            }
-            return false;
+            return value.Left < Right && Left < value.Right && value.Top < Bottom && Top < value.Bottom;
+        }
+        public readonly bool Surround(SMRectangle value)
+        {
+            return value.Left >= Left && value.Right <= Right && value.Top >= Top && value.Bottom <= Bottom;
         }
         public static SMRectangle operator *(SMRectangle rec, float scale)
         {
