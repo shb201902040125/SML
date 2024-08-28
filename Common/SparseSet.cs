@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SML.Common
 {
-    public class SparseSet<TKey, TValue> : IEnumerable<TValue> where TValue : unmanaged
+    public class SparseSet<TKey, TValue> : IEnumerable<TValue> where TValue : struct
     {
         TValue[] _datas;
         Dictionary<TKey, int> _map;

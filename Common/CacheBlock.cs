@@ -8,49 +8,46 @@ using Terraria.ModLoader;
 
 namespace SML.Common
 {
-    public unsafe class CacheBlock<T> : IDisposable where T : unmanaged
+    public unsafe class CacheBlock<T> : IDisposable where T : struct
     {
         T[] _data;
-        T* _ptr;
+        IntPtr _ptr;
         GCHandle _handle;
         SegmentTreeAllocator _allocator;
-        HashSet<Interface> undisposedInterfaces = [];
+        HashSet<Interface> undisposedInterfaces = new();
         internal object _lock = new();
         public CacheBlock(int capacity)
         {
             _data = new T[capacity];
             _handle = GCHandle.Alloc(_data, GCHandleType.Pinned);
-            _ptr = (T*)_handle.AddrOfPinnedObject().ToPointer();
+            _ptr = _handle.AddrOfPinnedObject();
             _allocator = new SegmentTreeAllocator(capacity);
         }
         ~CacheBlock()
         {
-            if (_data != null)
-            {
-                List<Interface> list = [.. undisposedInterfaces];
-                foreach (Interface @interface in list)
-                {
-                    @interface.Dispose();
-                }
-                _handle.Free();
-                _data = null;
-                _allocator = null;
-            }
+            Dispose(false);
         }
         public void Dispose()
         {
-            if (_data != null)
-            {
-                List<Interface> list = [.. undisposedInterfaces];
-                foreach (Interface @interface in list)
-                {
-                    @interface.Dispose();
-                }
-                _handle.Free();
-                _data = null;
-                _allocator = null;
-            }
+            Dispose(true);
             GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_data != null)
+                {
+                    List<Interface> list = new List<Interface>(undisposedInterfaces);
+                    foreach (Interface @interface in list)
+                    {
+                        @interface.Dispose();
+                    }
+                    _handle.Free();
+                    _data = null;
+                    _allocator = null;
+                }
+            }
         }
         public bool Rent(int size, out Interface @interface, SegmentTreeAllocator.AllocType allocType = SegmentTreeAllocator.AllocType.FirstFit)
         {
@@ -81,12 +78,18 @@ namespace SML.Common
                 _pos = pos;
                 _size = size;
             }
-            public ref T this[int index] => ref _cache._ptr[_pos + index];
+            public ref T this[int index]
+            {
+                get
+                {
+                    return ref _cache._data[_pos + index];
+                }
+            }
             public void Clear()
             {
                 for (int i = _pos; i < _pos + _size; i++)
                 {
-                    _cache._ptr[i] = default;
+                    this[i] = default;
                 }
             }
             public Span<T> AsSpan()
@@ -116,4 +119,5 @@ namespace SML.Common
             }
         }
     }
+
 }
