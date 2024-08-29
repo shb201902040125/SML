@@ -14,6 +14,16 @@ namespace SML.Physics
             _colliders = new(maxCapacity);
             _root = new(this, region);
         }
+        public ColliderTree(SMRectangle region, SparseSet<object, Collider> colliders)
+        {
+            _colliders = colliders;
+            _root = new(this, region);
+            foreach (var obj in _colliders.Keys)
+            {
+                var envelope = _colliders[obj].GetEnvelope();
+                _root.Insert(ref _colliders[obj], ref envelope);
+            }
+        }
         public bool Insert(Collider collider)
         {
             if (!_colliders.Add(collider.BindTarget, collider))

@@ -10,6 +10,7 @@ namespace SML.Common
         private Dictionary<TKey, int> _map;
         private Dictionary<int, TKey> _keys;
         private int _ptr = 0;
+        public IEnumerable<TKey> Keys => _map.Keys;
         public SparseSet(int capacity)
         {
             _datas = new TValue[capacity];
