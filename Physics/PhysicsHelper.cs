@@ -15,9 +15,9 @@ namespace SML.Physics
                 Vectors =
                 [
                     player.Hitbox.TopLeft(),
-                player.Hitbox.TopRight(),
-                player.Hitbox.BottomRight(),
-                player.Hitbox.BottomLeft()
+                    player.Hitbox.TopRight(),
+                    player.Hitbox.BottomRight(),
+                    player.Hitbox.BottomLeft()
                 ],
                 Transform = Matrix.CreateTranslation(-center.X, -center.Y, 0) *
                             Matrix.CreateRotationZ(player.fullRotation) *
@@ -46,9 +46,9 @@ namespace SML.Physics
                 Vectors =
                 [
                     item.position,
-                item.position + new Vector2(item.width, 0),
-                item.position + new Vector2(item.width, item.height),
-                item.position + new Vector2(0, item.height)
+                    item.position + new Vector2(item.width, 0),
+                    item.position + new Vector2(item.width, item.height),
+                    item.position + new Vector2(0, item.height)
                 ],
                 Transform = Matrix.Identity
             };
@@ -62,9 +62,9 @@ namespace SML.Physics
                 Vectors =
                 [
                     npc.Hitbox.TopLeft(),
-                npc.Hitbox.TopRight(),
-                npc.Hitbox.BottomRight(),
-                npc.Hitbox.BottomLeft()
+                    npc.Hitbox.TopRight(),
+                    npc.Hitbox.BottomRight(),
+                    npc.Hitbox.BottomLeft()
                 ],
                 Transform = Matrix.CreateTranslation(-center.X, -center.Y, 0) *
                             Matrix.CreateRotationZ(npc.rotation) *
@@ -81,9 +81,9 @@ namespace SML.Physics
                 Vectors =
                 [
                     projectile.Hitbox.TopLeft(),
-                projectile.Hitbox.TopRight(),
-                projectile.Hitbox.BottomRight(),
-                projectile.Hitbox.BottomLeft()
+                    projectile.Hitbox.TopRight(),
+                    projectile.Hitbox.BottomRight(),
+                    projectile.Hitbox.BottomLeft()
                 ],
                 Transform = Matrix.CreateTranslation(-center.X, -center.Y, 0) *
                             Matrix.CreateRotationZ(projectile.rotation) *
