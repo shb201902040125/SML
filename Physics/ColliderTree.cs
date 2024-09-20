@@ -1,14 +1,12 @@
-﻿using Microsoft.Xna.Framework;
-using SML.Common;
-using System;
+﻿using SML.Common;
 using System.Collections.Generic;
 
 namespace SML.Physics
 {
     public class ColliderTree
     {
-        SparseSet<object, Collider> _colliders;
-        ColliderTreeNode _root;
+        private SparseSet<object, Collider> _colliders;
+        private ColliderTreeNode _root;
         public ColliderTree(SMRectangle region, int maxCapacity)
         {
             _colliders = new(maxCapacity);
@@ -18,9 +16,9 @@ namespace SML.Physics
         {
             _colliders = colliders;
             _root = new(this, region);
-            foreach (var obj in _colliders.Keys)
+            foreach (object obj in _colliders.Keys)
             {
-                var envelope = _colliders[obj].GetEnvelope();
+                SMRectangle envelope = _colliders[obj].GetEnvelope();
                 _root.Insert(ref _colliders[obj], ref envelope);
             }
         }
@@ -30,7 +28,7 @@ namespace SML.Physics
             {
                 return false;
             }
-            var envelope = collider.GetEnvelope();
+            SMRectangle envelope = collider.GetEnvelope();
             if (!_root.Insert(ref collider, ref envelope))
             {
                 _colliders.Remove(collider.BindTarget);
@@ -40,20 +38,20 @@ namespace SML.Physics
         }
         public bool Remove(Collider collider)
         {
-            if(!_colliders.Remove(collider))
+            if (!_colliders.Remove(collider))
             {
                 return false;
             }
-            var envelope = collider.GetEnvelope();
+            SMRectangle envelope = collider.GetEnvelope();
             return _root.Remove(ref collider, ref envelope);
         }
-        public List<Collider> GetCollideWith(Collider collider,bool useSAT=true)
+        public List<Collider> GetCollideWith(Collider collider, bool useSAT = true)
         {
             HashSet<object> list = [];
-            var envelope = collider.GetEnvelope();
-            _root.GetCollideWith(ref collider, ref envelope, list,useSAT);
+            SMRectangle envelope = collider.GetEnvelope();
+            _root.GetCollideWith(ref collider, ref envelope, list, useSAT);
             List<Collider> result = [];
-            foreach (var obj in list)
+            foreach (object obj in list)
             {
                 result.Add(_colliders[obj]);
             }
@@ -69,10 +67,10 @@ namespace SML.Physics
         }
         private class ColliderTreeNode
         {
-            ColliderTree _tree;
-            SMRectangle _region;
-            HashSet<object> _objects;
-            ColliderTreeNode[] _children;
+            private ColliderTree _tree;
+            private SMRectangle _region;
+            private HashSet<object> _objects;
+            private ColliderTreeNode[] _children;
             public ColliderTreeNode(ColliderTree tree, SMRectangle region)
             {
                 _tree = tree;
@@ -86,7 +84,7 @@ namespace SML.Physics
                     return false;
                 }
                 SubDivide();
-                foreach (var child in _children)
+                foreach (ColliderTreeNode child in _children)
                 {
                     if (child._region.Surround(envelope))
                     {
@@ -104,7 +102,7 @@ namespace SML.Physics
                 }
                 if (_children is not null)
                 {
-                    foreach (var child in _children)
+                    foreach (ColliderTreeNode child in _children)
                     {
                         if (child._region.Surround(envelope))
                         {
@@ -122,7 +120,7 @@ namespace SML.Physics
                 }
                 if (_children is not null)
                 {
-                    foreach (var child in _children)
+                    foreach (ColliderTreeNode child in _children)
                     {
                         if (child._region.Surround(envelope))
                         {
@@ -131,9 +129,9 @@ namespace SML.Physics
                         }
                     }
                 }
-                foreach (var obj in _objects)
+                foreach (object obj in _objects)
                 {
-                    var c = _tree._colliders[obj];
+                    Collider c = _tree._colliders[obj];
                     if (useSAT ? c.CheckCollisionSAT(collider) : c.CheckCollisionGJK(collider))
                     {
                         list.Add(obj);
@@ -145,7 +143,7 @@ namespace SML.Physics
                 if (_children is not null)
                 {
                     bool cleanChildren = true;
-                    foreach (var child in _children)
+                    foreach (ColliderTreeNode child in _children)
                     {
                         child.Clean();
                         cleanChildren = cleanChildren && child._objects.Count == 0;

@@ -11,6 +11,8 @@ namespace SML.Common
         private Dictionary<int, TKey> _keys;
         private int _ptr = 0;
         public IEnumerable<TKey> Keys => _map.Keys;
+        public int Capacity => _datas.Length;
+        public bool IsFull => _ptr == _datas.Length;
         public SparseSet(int capacity)
         {
             _datas = new TValue[capacity];
@@ -70,6 +72,14 @@ namespace SML.Common
         public Span<TValue> AsSpan()
         {
             return new Span<TValue>(_datas, 0, _ptr);
+        }
+        public void Resize(int newCapacity)
+        {
+            if (newCapacity < _ptr)
+            {
+                throw new ArgumentException("New capacity cannot be smaller than the current number of elements.");
+            }
+            Array.Resize(ref _datas, newCapacity);
         }
     }
 }
