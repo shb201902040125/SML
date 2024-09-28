@@ -48,6 +48,10 @@ namespace SML.Physics
                 Height = Height * scale
             };
         }
+        public readonly bool Contains(Vector2 vector)
+        {
+            return vector.X > Left && vector.X < Right && vector.Y > Top && vector.Y < Bottom;
+        }
         public readonly bool Intersects(SMRectangle value)
         {
             return value.Left < Right && Left < value.Right && value.Top < Bottom && Top < value.Bottom;
