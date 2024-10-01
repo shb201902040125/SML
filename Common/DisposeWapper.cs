@@ -5,7 +5,7 @@ namespace SML.Common
     public class DisposeWapper<T> : IDisposable
     {
         private Action<T> _dispose;
-        public T Value { get; }
+        public T Value { get; private set; }
         public bool Disposed { get; private set; }
         public DisposeWapper(T value, Action<T> dispose)
         {
@@ -14,14 +14,23 @@ namespace SML.Common
         }
         ~DisposeWapper()
         {
-            if (!Disposed)
+            if (Disposed)
             {
-                _dispose?.Invoke(this);
+                return;
             }
+            _dispose?.Invoke(this);
+            _dispose = null;
+            Value = default;
         }
         public void Dispose()
         {
+            if(Disposed)
+            {
+                return;
+            }
             _dispose?.Invoke(Value);
+            _dispose = null;
+            Value = default;
             Disposed = true;
             GC.SuppressFinalize(this);
         }
