@@ -2,6 +2,35 @@
 
 namespace SML.Common
 {
+    public class DisposeWapper:IDisposable
+    {
+        private Action _dispose;
+        public bool Disposed { get; private set; }
+        public DisposeWapper(Action dispose)
+        {
+            _dispose = dispose;
+        }
+        ~DisposeWapper()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+            _dispose?.Invoke();
+            _dispose = null;
+        }
+        public void Dispose()
+        {
+            if (Disposed)
+            {
+                return;
+            }
+            _dispose?.Invoke();
+            _dispose = null;
+            Disposed = true;
+            GC.SuppressFinalize(this);
+        }
+    }
     public class DisposeWapper<T> : IDisposable
     {
         private Action<T> _dispose;
