@@ -1,7 +1,4 @@
 ﻿using SML.Common;
-using SML.Net;
-using System;
-using System.Reflection;
 
 namespace SML.ECS
 {
@@ -11,7 +8,7 @@ namespace SML.ECS
         public static ref T GetOrCreate(Entity entity) => ref GetOrCreate(entity.UniqueID);
         internal static ref T GetOrCreate(int uniqueID)
         {
-            if(_components.Contains(uniqueID))
+            if (_components.Contains(uniqueID))
             {
                 return ref _components[uniqueID];
             }

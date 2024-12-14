@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
 
 namespace SML.Physics
 {
@@ -41,7 +40,7 @@ namespace SML.Physics
             ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, start + vectors.Length);
             for (int i = 0; i < vectors.Length; i++)
             {
-                ApplyTo(vectors[i], ref buffer[start+i]);
+                ApplyTo(vectors[i], ref buffer[start + i]);
             }
         }
     }

@@ -2,7 +2,7 @@
 
 namespace SML.Common
 {
-    public class DisposeWapper:IDisposable
+    public class DisposeWapper : IDisposable
     {
         private Action _dispose;
         public bool Disposed { get; private set; }
@@ -53,7 +53,7 @@ namespace SML.Common
         }
         public void Dispose()
         {
-            if(Disposed)
+            if (Disposed)
             {
                 return;
             }

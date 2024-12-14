@@ -1,7 +1,5 @@
 ﻿using SML.Common;
-using SML.Net;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SML.ECS
@@ -53,7 +51,8 @@ namespace SML.ECS
             return $"Entity:{UniqueID}";
         }
     }
-    struct OnEntityDestroy
+
+    internal struct OnEntityDestroy
     {
         public event Action<Entity> OnDestory;
         public void Invoke(Entity entity)
